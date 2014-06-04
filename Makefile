@@ -1,6 +1,6 @@
 PROGRAM_NAME := calculate
 SOURCES:= calculator main
-CXXFLAGS := -W -std=c++0x -g
+CXXFLAGS := -W -std=c++0x -O3
 
 .PHONY: run clean rebuild
 
