@@ -1,0 +1,4 @@
+cmdcalc
+=======
+
+Commandline based calculator
