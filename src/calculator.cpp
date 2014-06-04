@@ -2,46 +2,9 @@
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
+#include "../include/calculator.hpp"
 
-class Expression;
-class NumberExpression;
-class CalculationExpression;
-
-class Expression
-{
-	public:
-		virtual double evaluate()=0;
-		virtual ~Expression();
-		static Expression* build(const char*);
-};
-
-class NumberExpression: public Expression
-{
-	const char* data;
-	public:
-		NumberExpression(const char* dat):
-			data(dat)
-		{
-		}
-		virtual double evaluate();
-		static NumberExpression* parse(const char*);
-};
-
-class CalculationExpression: public Expression
-{
-	Expression *left,*right;
-	const char oper;
-	public:
-		CalculationExpression(Expression* lhs,const char op,Expression* rhs):
-			left(lhs),
-			right(rhs),
-			oper(op)
-		{
-		}
-		virtual double evaluate();
-		virtual ~CalculationExpression();
-		static bool is_operator(char);
-};
+using namespace Calculator;
 
 static inline char* skip_spaces(const char* optr)
 {
@@ -56,15 +19,10 @@ static inline char* skip_nonspace(const char* optr)
 	while(!isspace(*ptr)&&*ptr) ptr++;
 	return ptr;
 }
-NumberExpression* NumberExpression::parse(const char* ptr)
+
+
+Expression::~Expression()
 {
-	NumberExpression* ret = nullptr;
-	char* mptr = skip_spaces(ptr);
-	if(isdigit(*mptr))
-	{
-		ret = new NumberExpression(mptr);
-	}
-	return ret;
 }
 
 Expression* Expression::build(const char* expression)
@@ -102,8 +60,28 @@ Expression* Expression::build(const char* expression)
 	return lhs;
 }
 
-Expression::~Expression()
+/*
+Number Expression Class
+ - Constructor: (char*)
+                The class is responsible for parsing the given string as a number.
+ - [static] parse: (char*)
+                Searches for a number, returns a new Number Expression from the heap.
+*/
+
+NumberExpression::NumberExpression(const char* d):
+data(d)
 {
+}
+
+NumberExpression* NumberExpression::parse(const char* ptr)
+{
+	NumberExpression* ret = nullptr;
+	char* mptr = skip_spaces(ptr);
+	if(isdigit(*mptr))
+	{
+		ret = new NumberExpression(mptr);
+	}
+	return ret;
 }
 
 double NumberExpression::evaluate()
@@ -112,6 +90,23 @@ double NumberExpression::evaluate()
 	//[ adds support for other number systems ].
 	//[ also, I can remove old <cstdlib> include!! ]
 	return strtod(data,NULL);
+}
+
+/*
+Calculation Expression Class
+ - Constructor: (Expression*,char,Expression*)
+                left-hand-side of a calculation.
+                operator to combine left and right hand sides.
+                right-hand-side of the calculation.
+ - [static] is_operator: (char)
+                returns true if supplied character matches a calculation operator.
+*/
+
+CalculationExpression::CalculationExpression(Expression* l,char o,Expression* r):
+left(l),
+oper(o),
+right(r)
+{
 }
 
 bool CalculationExpression::is_operator(char op)
@@ -146,19 +141,4 @@ CalculationExpression::~CalculationExpression()
 	delete left;
 	delete right;
 	left = right = nullptr; // just in case it gets destroyed twice?
-}
-
-int main(int argc,char** argv)
-{
-	std::string expression=argv[1];
-	for(int i=2;i<argc;i++)
-	{
-		expression+=' ';
-		expression+=argv[i];
-	}
-	std::cout << expression << std::endl << std::endl;
-	Expression* expr = Expression::build(expression.c_str());
-	std::cout << expr->evaluate() << std::endl;
-	delete expr;
-	return 0;
 }
