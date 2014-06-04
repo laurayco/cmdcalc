@@ -1,4 +1,4 @@
-PROGRAM_NAME := calculator
+PROGRAM_NAME := calculate
 SOURCES:= calculator main
 CXXFLAGS := -W -std=c++0x
 
